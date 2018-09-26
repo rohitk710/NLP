@@ -1,0 +1,8 @@
+.vscode/settings.json
+.\pretrained/*
+.\venv/*
+Assignment1/pretrained/checkpoint
+Assignment1/pretrained/.DS_Store
+Assignment1/pretrained/w2v_pretrained.cpkt.data-00000-of-00001
+Assignment1/pretrained/w2v_pretrained.cpkt.index
+Assignment1/pretrained/w2v_pretrained.cpkt.meta
