@@ -19,6 +19,16 @@ def cross_entropy_loss(inputs, true_w):
 
     ==========================================================================
     """
+
+    global A
+    global B
+
+    A = tf.diag_part(tf.matmul(true_w, tf.transpose(inputs)))
+   # A = tf.Print(A, [A], message='DEBUG A: ')
+
+    B = tf.log(tf.reduce_sum(tf.exp(tf.matmul(true_w, tf.transpose(inputs))),1, keepdims = True))
+   # B = tf.Print(B, [B], message='DEBUG B: ')
+
     return tf.subtract(B, A)
 
 def nce_loss(inputs, weights, biases, labels, sample, unigram_prob):

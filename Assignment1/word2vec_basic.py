@@ -110,8 +110,32 @@ def generate_batch(data, batch_size, num_skips, skip_window):
   global data_index
   assert batch_size % num_skips == 0
   assert num_skips <= 2 * skip_window
+  window_size = skip_window*2+1
+
   batch = np.ndarray(shape=(batch_size), dtype=np.int32)
   labels = np.ndarray(shape=(batch_size, 1), dtype=np.int32)
+
+  current_window = collections.deque(maxlen = window_size)
+  
+  for _ in range(window_size):
+    current_window.append(data[data_index])
+    data_index = (data_index + 1) % len(data)
+
+  total_draws = batch_size // num_skips
+
+  for itr in range(total_draws):
+    input_word = skip_window
+    word_added = [input_word]
+    for itr_2 in range(num_skips):
+      while(input_word in word_added):
+        input_word = random.randint(0, window_size-1)
+      word_added.append(input_word)
+      batch[itr*num_skips + itr_2] = input_word
+      labels[itr*num_skips + itr_2, 0] = current_window[input_word]
+    current_window.append(data[data_index])
+    data_index = (data_index + 1) % len(data)
+  
+  return batch, labels   
 
   """
   =================================================================================
