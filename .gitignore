@@ -8,3 +8,4 @@ Assignment1/pretrained/w2v_pretrained.cpkt.index
 Assignment1/pretrained/w2v_pretrained.cpkt.meta
 Assignment1/text8.zip
 Assignment1/models/word2vec_cross_entropy.model
+Assignment1/models/word2vec_nce.model

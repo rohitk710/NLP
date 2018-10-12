@@ -110,31 +110,29 @@ def generate_batch(data, batch_size, num_skips, skip_window):
   global data_index
   assert batch_size % num_skips == 0
   assert num_skips <= 2 * skip_window
-  window_size = skip_window*2+1
 
   batch = np.ndarray(shape=(batch_size), dtype=np.int32)
   labels = np.ndarray(shape=(batch_size, 1), dtype=np.int32)
 
-  current_window = collections.deque(maxlen = window_size)
-  
-  for _ in range(window_size):
-    current_window.append(data[data_index])
-    data_index = (data_index + 1) % len(data)
-
   total_draws = batch_size // num_skips
 
+  itr = 0
+
   for itr in range(total_draws):
-    input_word = skip_window
-    word_added = [input_word]
-    for itr_2 in range(num_skips):
-      while(input_word in word_added):
-        input_word = random.randint(0, window_size-1)
-      word_added.append(input_word)
-      batch[itr*num_skips + itr_2] = input_word
-      labels[itr*num_skips + itr_2, 0] = current_window[input_word]
-    current_window.append(data[data_index])
+    count = 1
+    for itr_1 in range(num_skips):
+      currentCentre = (data_index + skip_window) % len(data)
+      batch[itr*num_skips + itr_1] = data[currentCentre]
+      if(itr_1%2 == 0):
+        if(itr_1 == 0):
+          labels[itr*num_skips + itr_1] = data[(currentCentre + count)% len(data)]
+        else:
+          count +=1
+          labels[itr*num_skips + itr_1] = data[(currentCentre + count)% len(data)]  
+      if(itr_1%2 == 1):
+        labels[itr*num_skips + itr_1] = data[(currentCentre - count) % len(data)]
     data_index = (data_index + 1) % len(data)
-  
+
   return batch, labels   
 
   """
@@ -199,7 +197,8 @@ def build_model(sess, graph, loss_model):
 
       # Look up embeddings for inputs.
       embeddings = tf.Variable(
-          tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
+         tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
+
       embed = tf.nn.embedding_lookup(embeddings, train_inputs)
 
       sm_weights = tf.Variable(
@@ -228,7 +227,7 @@ def build_model(sess, graph, loss_model):
     # tf.summary.scalar('loss', loss)
 
     # Construct the SGD optimizer using a learning rate of 1.0.
-    optimizer = tf.train.GradientDescentOptimizer(1.0).minimize(loss, global_step=global_step)
+    optimizer = tf.train.GradientDescentOptimizer(0.01).minimize(loss, global_step=global_step)
 
     # Compute the cosine similarity between minibatch examples and all embeddings.
     norm = tf.sqrt(tf.reduce_sum(tf.square(embeddings), 1, keep_dims=True))
@@ -343,7 +342,7 @@ if __name__ == '__main__':
   data, count, dictionary, reverse_dictionary = build_dataset(words)
   del words  # Hint to reduce memory.
   print('Most common words (+UNK)', count[:5])
-  print('Sample data', data[:10], [reverse_dictionary[i] for i in data[:10]])
+  print('Sample data', data[:10], [reverse_dictionary[i] for i in data[:128]])
 
   #Calculate the probability of unigrams
   unigram_cnt = [c for w, c in count]
@@ -358,8 +357,8 @@ if __name__ == '__main__':
   #         TODO You must implement this method "generate_batch"
   #         Uncomment below to check batch output
 
-  # batch, labels = generate_batch(data, batch_size=8, num_skips=2, skip_window=1)
-  # for i in range(8):
+  # batch, labels = generate_batch(data, batch_size=128, num_skips=4, skip_window=2)
+  # for i in range(128):
   #   print(batch[i], reverse_dictionary[batch[i]],
   #         '->', labels[i, 0], reverse_dictionary[labels[i, 0]])
 
@@ -368,17 +367,17 @@ if __name__ == '__main__':
   # Hyper Parameters to config
   batch_size = 128
   embedding_size = 128  # Dimension of the embedding vector.
-  skip_window = 4       # How many words to consider left and right.
-  num_skips = 8         # How many times to reuse an input to generate a label.
+  skip_window = 2       # How many words to consider left and right.
+  num_skips = 4        # How many times to reuse an input to generate a label.
 
 
   # We pick a random validation set to sample nearest neighbors. Here we limit the
   # validation samples to the words that have a low numeric ID, which by
   # construction are also the most frequent.
-  valid_size = 16     # Random set of words to evaluate similarity on.
+  valid_size = 3     # Random set of words to evaluate similarity on.
   valid_window = 100  # Only pick dev samples in the head of the distribution.
-  valid_examples = np.random.choice(valid_window, valid_size, replace=False)
-  num_sampled = 64    # Number of negative examples to sample.
+  valid_examples = [dictionary['american'],dictionary['first'],dictionary['would']]
+  num_sampled = 32    # Number of negative examples to sample.
 
   # summary_path = './summary_%s'%(loss_model)
   pretrained_model_path = './pretrained/'
@@ -388,8 +387,8 @@ if __name__ == '__main__':
 
   
   # maximum training step
-  max_num_steps  = 200001
-  checkpoint_step = 50000
+  max_num_steps  = 800000
+  checkpoint_step = 200000
     
 
   graph = tf.Graph()
