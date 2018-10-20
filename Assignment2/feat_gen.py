@@ -1,5 +1,6 @@
 #!/bin/python
 
+lines=[]
 def preprocess_corpus(train_sents):
     """Use the sentences to do whatever preprocessing you think is suitable,
     such as counts, keeping track of rare features/words to remove, matches to lexicons,
@@ -10,7 +11,10 @@ def preprocess_corpus(train_sents):
 
     Note that you can also call token2features here to aggregate feature counts, etc.
     """
-    pass
+    with open('twitter_output_brown_train.pos') as f:
+        for line in f: 
+            line = line.strip() #or some other preprocessing
+            lines.append(line.split("\t")) #storing everything in memory!
 
 def token2features(sent, i, add_neighs = True):
     """Compute the features of a token.
@@ -55,6 +59,45 @@ def token2features(sent, i, add_neighs = True):
         ftrs.append("IS_UPPER")
     if word.islower():
         ftrs.append("IS_LOWER")
+    
+    # New features being added
+    #Suffix features
+    if word.endswith("ly"):
+        ftrs.append("IS_ADVERB")
+    if word.endswith("er") or word.endswith("ion") or word.endswith("ist") or word.endswith("ment") or word.endswith("ness") or word.endswith("ity") or word.endswith("ism"):
+        ftrs.append("IS_NOUN")
+    if word.endswith("less") or word.endswith("ful") or word.endswith("able") or word.endswith("ous") or word.endswith("al") or word.endswith("ish"):
+        ftrs.append("IS_ADJECTIVE")
+    if word.endswith("ate") or word.endswith("ify") or word.endswith("ise") or word.endswith("ize") or word.endswith("en"):
+        ftrs.append("IS_VERB")
+
+
+    #Prefix Features
+    if word.startswith("mis") or word.startswith("dis") or word.startswith("op"):
+        ftrs.append("IS_VERB")
+
+    if word.startswith("un"):
+        ftrs.append("IS_ADJECTIVE")
+
+    #Other rules
+    import string
+    if word in string.punctuation:
+        ftrs.append("IS_PUNCTUATION")
+    if len(word)>1 and word[0].isupper() and word[1].islower():
+        ftrs.append("IS_PROPER_NOUN")
+
+    #special Chars
+    if "-" in word:
+        ftrs.append("HAS_HYPHEN")
+
+    if word.startswith("#") or word.startswith("@") or word is "RT":
+        ftrs.append("IS_RANDOM")
+
+    #Brown Clustering
+    for sublist in lines:
+        if word.lower() == sublist[0]:
+            ftrs.append("Cluster"+sublist[1])
+            break
 
     # previous/next word feats
     if add_neighs:
@@ -70,7 +113,7 @@ def token2features(sent, i, add_neighs = True):
 
 if __name__ == "__main__":
     sents = [
-    [ "I", "love", "food" ]
+    [ "I", "love", "food", "tangential", "Importantly" ]
     ]
     preprocess_corpus(sents)
     for sent in sents:

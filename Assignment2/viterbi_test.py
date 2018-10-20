@@ -10,7 +10,7 @@ def run_viterbi_test():
 
     Compares both the best sequence and its score to make sure Viterbi is correct.
     """
-    from viterbi_soln import run_viterbi
+    from viterbi import run_viterbi
     from numpy import random
     import numpy as np
     from itertools import product
@@ -57,7 +57,7 @@ def run_viterbi_test():
             if score > best_s:
                 best_s = score
                 best_y = list(y)
-        # print "Brute", best_s, best_y
+        #print "Brute", best_s, best_y
 
         # mismatch if any label prediction doesn't match
         match_y = True
