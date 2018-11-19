@@ -103,6 +103,32 @@ class ParsingSystem:
         =================================================================
         """
 
+        # Check for left or right reduce transitions.
+        if t.startswith("L") or t.startswith("R"):
+            label = t[2:-1]
+            # Left-reduce
+            # adds an arc s1(h:head) -> s2(d:dependent) with
+            # label and removes s2(d:dependent) from the stack.
+            if t.startswith("L"):
+                h = c.getStack(0)
+                d = c.getStack(1)
+                c.removeSecondTopStack()
+                c.addArc(h,d,label)
+            # Right-reduce
+            # adds an arc s2(h:head) -> s1(d:dependent) with
+            # label and removes s1(d:dependent) from the stack.
+            else:
+                h = c.getStack(1)
+                d = c.getStack(0)
+                c.removeTopStack()
+                c.addArc(h,d,label)
+        # Shift
+        # moves b1 from the buffer to the stack
+        else:
+            c.shift()
+
+        return c
+
     def numTransitions(self):
         return len(self.transitions)
 
