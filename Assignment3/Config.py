@@ -3,9 +3,9 @@ ROOT = "ROOT"
 NULL = "NULL"
 NONEXIST = -1
 
-max_iter = 4001
+max_iter = 1001
 batch_size = 10000
-hidden_size = 400
+hidden_size = 200
 embedding_size = 50
 learning_rate = 0.1
 display_step = 100

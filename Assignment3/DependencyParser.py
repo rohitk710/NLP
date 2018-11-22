@@ -90,7 +90,7 @@ class DependencyParserModel(object):
             train_embed = tf.reshape(train_embed, [Config.batch_size, Config.n_Tokens * Config.embedding_size])
 
             # Variable to store Bias of size hidden_size with intial values set to zero
-            # biases_input = tf.Variable(tf.zeros([Config.batch_size]))
+            # biases_input = tf.Variable(tf.zeros([Config.hidden_size]))
             biases_input = tf.Variable(tf.random_uniform([Config.hidden_size],-1,1))
             # biases_input = tf.Variable(tf.random_normal([Config.hidden_size], mean=0.0, stddev=0.1))
 
@@ -99,9 +99,9 @@ class DependencyParserModel(object):
             # biases_input_third_layer = tf.Variable(tf.random_uniform([Config.hidden_size],-1,1))
             
             # Bisases for three paralle hidden layers
-            # biases_input_w = tf.Variable(tf.random_uniform([Config.hidden_size],-1,1))
-            # biases_input_t = tf.Variable(tf.random_uniform([Config.hidden_size],-1,1))
-            # biases_input_l = tf.Variable(tf.random_uniform([Config.hidden_size],-1,1))
+            # biases_input_w = tf.Variable(tf.zeros([Config.hidden_size]))
+            # biases_input_t = tf.Variable(tf.zeros([Config.hidden_size]))
+            # biases_input_l = tf.Variable(tf.zeros([Config.hidden_size]))
 
 
             # Variable to store input weight for hidden layer of size embedding_size*n_Tokens 
@@ -158,7 +158,7 @@ class DependencyParserModel(object):
             grads = optimizer.compute_gradients(self.loss)
             clipped_grads = [(tf.clip_by_norm(grad, 5), var) for grad, var in grads]
             self.app = optimizer.apply_gradients(clipped_grads)
-            #Gradient clipping
+            # Gradient clipping
             # self.app = optimizer.apply_gradients(grads)
 
 
